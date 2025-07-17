@@ -1,6 +1,6 @@
-# 🧠 Cademi Auto Organizer – Tampermonkey Script
+# 🧠 Cademi Auto Organizer – DevTools Script
 
-Este é um script desenvolvido para ser executado via **[Tampermonkey](https://www.tampermonkey.net/)** e tem como objetivo **ordenar automaticamente os módulos e aulas** em plataformas EAD baseadas na estrutura da Cademi.
+Este é um script desenvolvido para ser executado no Devtools e tem como objetivo **ordenar automaticamente os módulos e aulas** em plataformas EAD baseadas na estrutura da Cademí.
 
 ## 🔧 O que o script faz
 
@@ -16,18 +16,22 @@ Este é um script desenvolvido para ser executado via **[Tampermonkey](https://w
 
 ## 🚀 Como usar
 
-### 1. Instale o Tampermonkey
+### 1. Acesse a página do produto
 
-- Chrome/Edge: [https://tampermonkey.net/?ext=dhdg&browser=chrome](https://tampermonkey.net/?ext=dhdg&browser=chrome)
-- Firefox: [https://tampermonkey.net/?ext=dhdg&browser=firefox](https://tampermonkey.net/?ext=dhdg&browser=firefox)
+Abra a página de gerenciamento de aulas/módulos da plataforma Cademi.
 
-### 2. Adicione o script
+### 2. Abra o DevTools do navegador
 
-- Crie um novo script no painel do Tampermonkey
-- Copie e cole o conteúdo de [`script.js`](./script.js) (ou o código abaixo)
+- No **Chrome/Edge/Firefox**, pressione `F12` ou `Ctrl + Shift + I` (ou `Cmd + Option + I` no Mac).
+- Vá até a aba **Console**.
 
-### 3. Acesse a plataforma (ex: `https://*.cademi.com.br/office/produtos/...`)  
-> O script será executado automaticamente ou via botão (caso implementado)
+### 3. Cole o script
+
+- Copie o conteúdo de [`script.js`](./script.js) ou do código abaixo.
+- Cole **inteiramente no console** e pressione `Enter`.
+
+O script começará a executar, reordenando os módulos e aulas de acordo com a numeração nos títulos.  
+Ao final, você verá uma confirmação no console e um alerta na tela.
 
 ---
 
