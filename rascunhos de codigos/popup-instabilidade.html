@@ -1,0 +1,80 @@
+<div id="popup-container" class="popup-hidden">
+        <div class="popup-content">
+            <h2>Comunicado sobre Instabilidade na Plataforma – Julho/2025</h2>
+            <p>Nos últimos dias, alguns alunos enfrentaram dificuldades de acesso à plataforma devido a uma falha técnica no data center do nosso fornecedor de hospedagem (Linode – Newark, NY). O problema começou em 27/07 e foi causado por uma queda de energia que comprometeu o sistema de refrigeração dos servidores. Isso afetou não apenas a Cademí, nossa plataforma de estudos, mas também milhares de outras empresas ao redor do mundo.</p>
+            <p>Essa instabilidade impactou parte da estrutura global da plataforma, incluindo servidores em diferentes regiões. A equipe técnica da Cademí atuou prontamente, transferindo os serviços para outro provedor e ativando os backups para garantir a continuidade do funcionamento.</p>
+            <p>Essa é a atualização oficial repassada pelo fornecedor da plataforma.</p>
+            <p>Nós, do Instituto Mundo Bíblico, pedimos desculpas pelo transtorno e agradecemos sua paciência e compreensão.</p>
+            <p>Pedimos que aguarde enquanto o sistema é totalmente normalizado.</p>
+            <p>Se precisar de ajuda, entre em contato com nosso suporte:📞 (48) 3194-0719</p>
+            <p>Também manteremos você informado pelo grupo de alunos no WhatsApp.</p>
+            <p>Se ainda não faz parte, aqui está o link para entrar: </p>
+            
+            <button id="external-link">Link</button>
+            <button id="close-popup">Fechar</button>
+        </div>
+    </div>
+<style>
+    #popup-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+#popup-container.popup-hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+.popup-content {
+    background-color: black;
+    background-size: cover;
+    padding: 30px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    color: white;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.popup-content h2 {
+    margin: 0 0 10px 0;
+}
+.popup-content button {
+    background: #007BFF;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.popup-content button:hover {
+    background: #0056B3;
+}
+</style>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+    const popup = document.getElementById("popup-container");
+    const closePopupButton = document.getElementById("close-popup");
+    const openLinkButton = document.getElementById("external-link");
+    // Mostrar o pop-up ao carregar a página
+    popup.classList.remove("popup-hidden");
+    // Fechar o pop-up quando o botão for clicado
+    closePopupButton.addEventListener("click", () => {
+        popup.classList.add("popup-hidden");
+    });
+    openLinkButton.addEventListener("click", () => {
+        window.open("https://chat.whatsapp.com/LVxRFd97SV5LssiVjgfGv9", "_blank"); // Substitua o link pelo desejado
+    });
+});
+</script>

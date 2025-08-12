@@ -1,0 +1,19 @@
+<style>
+    footer{
+        text-align: center;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Seleciona todos os elementos <small>
+    const elementosSmall = document.querySelectorAll('footer small');
+
+    elementosSmall.forEach(function (el) {
+        if (el.textContent.includes('- 28.986.741/0001-02')) {
+            // Remove apenas o CNPJ mantendo o restante do texto
+            el.textContent = el.textContent.replace(/28\.986\.741\/0001\-02/g, '');
+        }
+    });
+});
+</script>

@@ -1,0 +1,43 @@
+<style>
+.parent-div {
+  position: relative;
+}
+
+.auth-panel-wrapper.col {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background-image: url('https://i.postimg.cc/qqGtMvNP/Sem-T-tulo-1.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100%;
+}
+
+.auth_credits {
+  display: none;
+}
+
+.footer-copyright {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
+
+/* Media Query para dispositivos móveis */
+@media screen and (max-width: 768px) {
+  .auth-panel-wrapper.col {
+    background-image: url('https://i.postimg.cc/8kWNQdt2/oficial-Cademi-Login-Mobile-vers-o-oficial-828x1472-1.png');
+  }
+}
+
+/* Para telas muito pequenas (smartphones) */
+@media screen and (max-width: 480px) {
+  .auth-panel-wrapper.col {
+    background-image: url('https://i.postimg.cc/8kWNQdt2/oficial-Cademi-Login-Mobile-vers-o-oficial-828x1472-1.png');
+  }
+}
+</style>

@@ -1,0 +1,55 @@
+
+<form method="post" action="#" accept-charset="utf-8" id="FormCadastro" data-language='{"error_name":"Nome obrigat\u00f3rio","error_email":"Email obrigat\u00f3rio","error_email_invalid":"Email inv\u00e1lido"}'>
+	<input type="hidden" name="realm" value="https://361297.cademi.com.br" />
+	<input type="hidden" name="token" value="34d6facd317b9e478c0a995abc82a242" />
+	<input type="hidden" name="redirect" value="/" />
+	<input type="text" name="nome" placeholder="Insira seu nome" />
+	<input type="text" name="email" placeholder="Insira seu email" />
+	<input type="text" name="celular" placeholder="Insira seu celular" maxlength="15" onkeyup="_registerHandlePhone(event)"  />
+	<button type="submit">Cadastrar</button>
+</form>
+<script type="text/javascript" src="https://cdn.areademembros.com/assets/ptl-cadastro.js"></script>
+<style>
+
+	#FormCadastro {
+		width: 400px;
+		max-width: 100%;
+		font-family: Arial;
+	}
+	#FormCadastro > *{
+		box-sizing: border-box;
+		display: block;
+		width: 100%;
+		border-radius: 4px;
+	}
+	#FormCadastro input._error{
+		border-color: red;
+	}
+	#FormCadastro div._error{
+		text-align: right;
+		font-size: 0.7rem;
+		text-transform: uppercase;
+		margin-bottom: 5px;
+		color: red;
+	}
+	#FormCadastro input{
+		padding: 0 10px;
+		margin-bottom: 5px;
+		line-height: 42px;
+		border: 1px solid #212121;
+	}
+	#FormCadastro button{
+		border: none;
+		line-height: 42px;
+		cursor: pointer;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+		background: #c2891c;
+		color: #FFFFFF;
+	}
+	#FormCadastro button:hover{
+		background: #FFFFFF ;
+		color: #c2891c;
+	}
+
+</style>

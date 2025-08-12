@@ -1,0 +1,48 @@
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.body.addEventListener("click", function(event) {
+        
+        // Ignora cliques nas setas de navegação do banner.
+        if (event.target.closest('.video-control')) {
+            return; 
+        }
+        
+        const slideClicado = event.target.closest('.swiper-slide');
+        if (!slideClicado) {
+            return;
+        }
+        
+        const indexDoSlide = slideClicado.dataset.index;
+        
+        // Index inicia em 0 = Banner 1, index 2 = banner 2
+        if (indexDoSlide === '1') {
+            const link = "https://discord.com/invite/UWgQhRgu6n?_gl=11luzj2z_gaODQ4NDUyOTI5LjE3NTIyNTg3Mzc._ga_37GXT4VGQK*czE3NTI1MTg3NTAkbzYkZzEkdDE3NTI1MTg5MDgkajYwJGwwJGgw";
+            window.open(link, "_blank");
+            return;
+        }
+        
+        // Index inicia em 0 = Banner 1, index 2 = banner 2
+        if (indexDoSlide === '2') {
+            const vitrine = document.querySelector("#grupo-vitrine-64537");
+            if (vitrine) {
+                vitrine.scrollIntoView({ behavior: 'smooth' });
+            }
+            return;
+        }
+    }, true);
+    
+    const style = document.createElement('style');
+    if (!document.getElementById('banner-click-styles')) {
+        style.id = 'banner-click-styles';
+        
+        style.innerHTML = `
+            .swiper-slide[data-index="1"],
+            .swiper-slide[data-index="2"] {
+                cursor: pointer;
+            }
+        `;
+        
+        document.head.appendChild(style);
+    }
+});
+</script>

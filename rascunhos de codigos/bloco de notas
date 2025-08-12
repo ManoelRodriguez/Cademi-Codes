@@ -1,0 +1,12 @@
+Preciso de uma página html elegante e bonita, que tenha um formulario que recebe campos como Nome da plataforma, 
+API key e um botão de Enviar Requisição. 
+
+Essa requisição deverá ser feita para https://{NOME DA PLATAFORMA}.cademi.com.br/api/v1/usuario
+
+precisa enviar a API key no header, utilizar o bearer como metodo de auth.
+
+retornar todos os usuário em uma tabela, com as colunas: Nome, email, celular, último acesso.
+
+o ultimo acesso virá no formato "2025-07-24T16:17:09-03:00", exibiar no formato br dia/mês/ano.
+
+a tabela pode ser exibida abaixo do botão de enviar

@@ -1,0 +1,134 @@
+{
+  "nodes": [
+    {
+      "id": "Trigger",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "id": "User IDs",
+      "name": "User IDs",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "parameters": {
+        "values": {
+          "json": [
+            {
+              "id": 11111111
+            },
+            {
+              "id": 22222222
+            },
+            {
+              "id": 33333333
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Split Users",
+      "name": "Split Users",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "parameters": {
+        "batchSize": 1
+      }
+    },
+    {
+      "id": "Get Access",
+      "name": "Get Access",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "parameters": {
+        "url": "https://play-manoel.cademi.com.br/api/v1/usuario/acesso={{$json[\"id\"]}}",
+        "method": "GET",
+        "responseFormat": "json"
+      }
+    },
+    {
+      "id": "Check Encerrados",
+      "name": "Check Encerrados",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1050, 300],
+      "parameters": {
+        "functionCode": "const acessos = items[0].json.data.acesso;\n\nconst todosEncerrados = acessos.every(a => a.encerrado === true);\n\nif (todosEncerrados) {\n  return [{ json: { id: items[0].json.data.usuario.id } }];\n} else {\n  return [];\n}"
+      }
+    },
+    {
+      "id": "Delete User",
+      "name": "Delete User",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [1250, 300],
+      "parameters": {
+        "url": "https://play-manoel.cademi.com.br/api/v1/usuario/{{$json[\"id\"]}}",
+        "method": "DELETE",
+        "responseFormat": "json"
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "User IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "User IDs": {
+      "main": [
+        [
+          {
+            "node": "Split Users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Users": {
+      "main": [
+        [
+          {
+            "node": "Get Access",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Access": {
+      "main": [
+        [
+          {
+            "node": "Check Encerrados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Encerrados": {
+      "main": [
+        [
+          {
+            "node": "Delete User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
