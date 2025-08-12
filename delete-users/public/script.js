@@ -67,7 +67,7 @@ modalOverlay.addEventListener('click', (event) => {
 });
 
 // --- Funções Auxiliares ---
-async function fetchUsersFromApi({ platformName, apiKey, paginationUrl }) {
+/* async function fetchUsersFromApi({ platformName, apiKey, paginationUrl }) {
     resultsContainer.innerHTML = `<div class="feedback">Buscando bloco de usuários...</div>`;
     submitButton.disabled = true;
     paginationContainer.innerHTML = '';
@@ -87,7 +87,44 @@ async function fetchUsersFromApi({ platformName, apiKey, paginationUrl }) {
     } finally {
         submitButton.disabled = false;
     }
+} */
+
+//FRONT PARA PAGINAÇÃO COMPLETA - BUSCANDO TODOS OS USUÁRIOS
+async function fetchUsersFromApi({ platformName, apiKey }) { // Simplificada, não precisa mais de paginationUrl
+    resultsContainer.innerHTML = `<div class="feedback">Buscando todos os usuários. Isso pode levar um momento...</div>`;
+    submitButton.disabled = true;
+    paginationContainer.innerHTML = ''; // Limpa a paginação antiga
+
+    try {
+        // ⭐ MUDANÇA 1: Chama o novo endpoint /api/users/all
+        const response = await fetch('http://localhost:3000/api/users/all', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ platformName, apiKey }) // Não envia mais paginationUrl
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Erro ${response.status}`);
+        }
+
+        // ⭐ MUDANÇA 2: A resposta agora é o array completo diretamente
+        const responseData = await response.json();
+
+        // A paginação da API não é mais relevante aqui, pois já temos todos os dados
+        apiPaginationUrls = { next: null, prev: null };
+        fullUserList = responseData || []; // A resposta é a própria lista
+
+        // O resto da lógica funciona como antes!
+        renderClientPage();
+
+    } catch (error) {
+        resultsContainer.innerHTML = `<div class="feedback error"><strong>Falha na requisição.</strong><br><small>${error.message}</small></div>`;
+    } finally {
+        submitButton.disabled = false;
+    }
 }
+
 
 function renderClientPage() {
     const totalClientPages = Math.ceil(fullUserList.length / CLIENT_PAGE_SIZE);
