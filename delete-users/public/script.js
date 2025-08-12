@@ -1,0 +1,194 @@
+
+// --- Seletores do DOM ---
+const apiForm = document.getElementById('apiForm');
+const platformNameInput = document.getElementById('platformName');
+const apiKeyInput = document.getElementById('apiKey');
+const resultsContainer = document.getElementById('resultsContainer');
+const submitButton = document.getElementById('submitButton');
+const paginationContainer = document.getElementById('pagination-container');
+const modalOverlay = document.getElementById('modal-overlay');
+const userModal = document.getElementById('user-modal');
+const modalCloseBtn = document.getElementById('modal-close-btn');
+const modalContent = document.getElementById('modal-content');
+
+// --- Variáveis de Estado ---
+let currentApiKey = '';
+let currentPlatform = '';
+let apiPaginationUrls = { next: null, prev: null };
+let fullUserList = [];
+let clientCurrentPage = 1;
+const CLIENT_PAGE_SIZE = 12;
+
+// --- Lógica Principal ---
+apiForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    currentApiKey = apiKeyInput.value.trim();
+    currentPlatform = platformNameInput.value.trim();
+    if (!currentPlatform || !currentApiKey) return;
+    clientCurrentPage = 1;
+    fetchUsersFromApi({ platformName: currentPlatform, apiKey: currentApiKey });
+});
+
+paginationContainer.addEventListener('click', (event) => {
+    const target = event.target.closest('.page-btn');
+    if (!target || target.disabled) return;
+    const action = target.dataset.action;
+    const totalClientPages = Math.ceil(fullUserList.length / CLIENT_PAGE_SIZE);
+    if (action === 'prev') {
+        if (clientCurrentPage > 1) { clientCurrentPage--; renderClientPage(); }
+        else if (apiPaginationUrls.prev) { fetchUsersFromApi({ apiKey: currentApiKey, paginationUrl: apiPaginationUrls.prev }); }
+    } else if (action === 'next') {
+        if (clientCurrentPage < totalClientPages) { clientCurrentPage++; renderClientPage(); }
+        else if (apiPaginationUrls.next) { clientCurrentPage = 1; fetchUsersFromApi({ apiKey: currentApiKey, paginationUrl: apiPaginationUrls.next }); }
+    } else if (action === 'page') {
+        const page = parseInt(target.dataset.page, 10);
+        if (page !== clientCurrentPage) { clientCurrentPage = page; renderClientPage(); }
+    }
+});
+
+resultsContainer.addEventListener('click', (event) => {
+    const editButton = event.target.closest('.edit-btn');
+    if (editButton) {
+        const userEmail = editButton.dataset.email;
+        if (userEmail) { showUserAccessModal(userEmail); }
+    }
+});
+
+modalCloseBtn.addEventListener('click', () => {
+    modalOverlay.classList.add('hidden');
+    userModal.classList.add('hidden');
+});
+
+modalOverlay.addEventListener('click', (event) => {
+    if (event.target === modalOverlay) {
+        modalOverlay.classList.add('hidden');
+        userModal.classList.add('hidden');
+    }
+});
+
+// --- Funções Auxiliares ---
+async function fetchUsersFromApi({ platformName, apiKey, paginationUrl }) {
+    resultsContainer.innerHTML = `<div class="feedback">Buscando bloco de usuários...</div>`;
+    submitButton.disabled = true;
+    paginationContainer.innerHTML = '';
+    try {
+        const response = await fetch('http://localhost:3000/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ platformName, apiKey, paginationUrl })
+        });
+        if (!response.ok) throw new Error((await response.json()).error);
+        const responseData = await response.json();
+        apiPaginationUrls = { next: responseData.data.paginator.next_page_url, prev: responseData.data.paginator.prev_page_url };
+        fullUserList = responseData.data.usuario || [];
+        renderClientPage();
+    } catch (error) {
+        resultsContainer.innerHTML = `<div class="feedback error"><strong>Falha na requisição.</strong><br><small>${error.message}</small></div>`;
+    } finally {
+        submitButton.disabled = false;
+    }
+}
+
+function renderClientPage() {
+    const totalClientPages = Math.ceil(fullUserList.length / CLIENT_PAGE_SIZE);
+    const start = (clientCurrentPage - 1) * CLIENT_PAGE_SIZE;
+    const end = start + CLIENT_PAGE_SIZE;
+    const usersToDisplay = fullUserList.slice(start, end);
+    displayUsersTable(usersToDisplay);
+    renderPaginationControls(clientCurrentPage, totalClientPages);
+}
+
+function displayUsersTable(users) {
+    if (!users || users.length === 0) {
+        resultsContainer.innerHTML = `<div class="feedback">Nenhum usuário encontrado.</div>`;
+        paginationContainer.innerHTML = '';
+        return;
+    }
+    let tableHTML = `
+                <table>
+                    <thead><tr><th>Nome</th><th>Email</th><th>Celular</th><th>Último Acesso</th><th>Ações</th></tr></thead>
+                    <tbody>`;
+    users.forEach(user => {
+        const ultimoAcesso = user.ultimo_acesso_em ? new Date(user.ultimo_acesso_em).toLocaleString('pt-BR') : 'Nunca';
+        tableHTML += `
+                    <tr>
+                        <td>${user.nome || ''}</td>
+                        <td>${user.email || ''}</td>
+                        <td>${user.celular || 'Não informado'}</td>
+                        <td>${ultimoAcesso}</td>
+                        <td><button class="edit-btn" data-email="${user.email}" title="Ver Acessos de ${user.nome}"><svg viewBox="0 0 24 24"><path d="M14.06,9.02l0.91,0.91L5.91,19.06H5v-0.91L14.06,9.02 M17.66,3c-0.25,0-0.51,0.1-0.7,0.29l-1.83,1.83l3.75,3.75l1.83-1.83c0.39-0.39,0.39-1.02,0-1.41l-2.34-2.34C18.17,3.09,17.92,3,17.66,3L17.66,3z M14.06,6.19L3,17.25V21h3.75L17.81,9.94L14.06,6.19L14.06,6.19z"></path></svg></button></td>
+                    </tr>`;
+    });
+    tableHTML += `</tbody></table>`;
+    resultsContainer.innerHTML = tableHTML;
+}
+
+function renderPaginationControls(currentPage, totalPages) {
+    let html = '';
+    const maxVisibleButtons = 7;
+    const isPrevDisabled = currentPage === 1 && !apiPaginationUrls.prev;
+    html += `<button class="page-btn" data-action="prev" ${isPrevDisabled ? 'disabled' : ''}>&larr;</button>`;
+    if (totalPages <= maxVisibleButtons) {
+        for (let i = 1; i <= totalPages; i++) { html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" data-action="page" data-page="${i}">${i}</button>`; }
+    } else {
+        let pages = [1];
+        let start = Math.max(2, currentPage - 1), end = Math.min(totalPages - 1, currentPage + 1);
+        if (currentPage > 3) pages.push('...');
+        for (let i = start; i <= end; i++) pages.push(i);
+        if (currentPage < totalPages - 2) pages.push('...');
+        pages.push(totalPages);
+        pages = [...new Set(pages)];
+        pages.forEach(p => {
+            if (p === '...') { html += `<span class="page-ellipsis">...</span>`; }
+            else { html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" data-action="page" data-page="${p}">${p}</button>`; }
+        });
+    }
+    const isNextDisabled = currentPage === totalPages && !apiPaginationUrls.next;
+    html += `<button class="page-btn" data-action="next" ${isNextDisabled ? 'disabled' : ''}>&rarr;</button>`;
+    paginationContainer.innerHTML = html;
+}
+
+async function showUserAccessModal(userEmail) {
+    modalOverlay.classList.remove('hidden');
+    userModal.classList.remove('hidden');
+    modalContent.innerHTML = '<div class="loader"></div>';
+    try {
+        const response = await fetch('http://localhost:3000/api/user-access', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ platformName: currentPlatform, apiKey: currentApiKey, userEmail: userEmail })
+        });
+        if (!response.ok) throw new Error((await response.json()).error);
+        const responseData = await response.json();
+        populateModal(responseData.data);
+    } catch (error) {
+        modalContent.innerHTML = `<div class="feedback error">${error.message}</div>`;
+    }
+}
+
+function populateModal(data) {
+    const user = data.usuario;
+    const accesses = data.acesso;
+    const userDetails = `
+                <div id="modal-user-details">
+                    <h2>${user.nome}</h2>
+                    <p><strong>Email:</strong> ${user.email || 'Não informado'}</p>
+                    <p><strong>Celular:</strong> ${user.celular || 'Não informado'}</p>
+                    <p><strong>Documento:</strong> ${user.doc || 'Não informado'}</p>
+                    <p><strong>Data de Criação:</strong> ${new Date(user.criado_em).toLocaleDateString('pt-BR')}</p>
+                </div>
+            `;
+    let coursesTable = `
+                <div id="modal-courses-table">
+                    <h3>Cursos e Acessos</h3>
+                    <table><thead><tr><th>ID</th><th>Nome do Produto</th><th>Encerrado</th></tr></thead><tbody>`;
+    if (accesses && accesses.length > 0) {
+        accesses.forEach(access => {
+            coursesTable += `<tr><td>${access.produto.id}</td><td>${access.produto.nome}</td><td>${access.encerrado ? 'Sim' : 'Não'}</td></tr>`;
+        });
+    } else {
+        coursesTable += `<tr><td colspan="3">Nenhum acesso encontrado.</td></tr>`;
+    }
+    coursesTable += `</tbody></table></div>`;
+    modalContent.innerHTML = userDetails + coursesTable;
+}

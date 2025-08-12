@@ -10,6 +10,8 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 
+app.use(express.static('public'));
+
 app.post('/api/users', async (req, res) => {
     // Agora pegamos três possíveis valores do corpo da requisição
     const { platformName, apiKey, paginationUrl } = req.body;
