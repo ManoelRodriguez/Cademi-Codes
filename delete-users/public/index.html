@@ -53,10 +53,18 @@
                     <button type="submit" id="submitButton" class="submit-btn">Consultar Usuários</button>
                 </form>
 
-                <div id="resultsContainer" class="results-container">
+                <div id="listView">
+                    <div id="resultsContainer" class="results-container">
+                    </div>
+                    <div id="pagination-container" class="pagination-container">
+                    </div>
                 </div>
 
-                <div id="pagination-container" class="pagination-container">
+                <div id="deleteView" class="hidden">
+                    <div id="deleteResultsContainer" class="results-container">
+                    </div>
+                    <div id="deletePaginationContainer" class="pagination-container">
+                    </div>
                 </div>
             </div>
         </main>

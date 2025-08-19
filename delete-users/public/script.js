@@ -16,6 +16,15 @@ const eyeOpenIcon = document.getElementById('eye-open');
 const eyeClosedIcon = document.getElementById('eye-closed');
 
 
+// Função de Delete
+const sidebarLinks = document.querySelectorAll('.sidebar-menu a');
+const listView = document.getElementById('listView');
+const deleteView = document.getElementById('deleteView');
+const deleteResultsContainer = document.getElementById('deleteResultsContainer');
+const deletePaginationContainer = document.getElementById('deletePaginationContainer');
+const pageTitle = document.querySelector('.container h2');
+
+
 // --- Variáveis de Estado ---
 let currentApiKey = '';
 let currentPlatform = '';
@@ -23,18 +32,50 @@ let apiPaginationUrls = { next: null, prev: null };
 let fullUserList = [];
 let clientCurrentPage = 1;
 const CLIENT_PAGE_SIZE = 12;
+let fullDeletableUserList = [];
+let clientDeletableCurrentPage = 1;
 
 
 // --- Lógica Principal / Event Listeners (Todos juntos) ---
 
-// Evento de submit do formulário principal
+// Evento de submit do formulário principal (MODIFICADO)
 apiForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     currentApiKey = apiKeyInput.value.trim();
     currentPlatform = platformNameInput.value.trim();
     if (!currentPlatform || !currentApiKey) return;
-    clientCurrentPage = 1;
-    fetchUsersFromApi({ platformName: currentPlatform, apiKey: currentApiKey });
+
+    // Verifica qual view está ativa para chamar a função correta
+    if (!deleteView.classList.contains('hidden')) {
+        clientDeletableCurrentPage = 1;
+        fetchDeletableUsers({ platformName: currentPlatform, apiKey: currentApiKey });
+    } else {
+        clientCurrentPage = 1;
+        fetchUsersFromApi({ platformName: currentPlatform, apiKey: currentApiKey });
+    }
+});
+
+// Gerencia a troca de abas (Listar / Deletar)
+sidebarLinks.forEach(link => {
+    link.addEventListener('click', (event) => {
+        event.preventDefault();
+        sidebarLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+
+        const isDeleteView = link.textContent.includes('Deletar');
+
+        if (isDeleteView) {
+            listView.classList.add('hidden');
+            deleteView.classList.remove('hidden');
+            pageTitle.textContent = 'Deletar Usuários Inativos';
+            submitButton.textContent = 'Buscar Usuários para Deletar';
+        } else {
+            deleteView.classList.add('hidden');
+            listView.classList.remove('hidden');
+            pageTitle.textContent = 'Consulta de Usuários - Cademi';
+            submitButton.textContent = 'Consultar Usuários';
+        }
+    });
 });
 
 // Evento para o botão de ver/esconder a API Key
@@ -63,6 +104,23 @@ paginationContainer.addEventListener('click', (event) => {
     } else if (action === 'page') {
         const page = parseInt(target.dataset.page, 10);
         if (page !== clientCurrentPage) { clientCurrentPage = page; renderClientPage(); }
+    }
+});
+
+// Evento para os cliques na paginação da tela de DELEÇÃO
+deletePaginationContainer.addEventListener('click', (event) => {
+    const target = event.target.closest('.page-btn');
+    if (!target || target.disabled) return;
+    const action = target.dataset.action;
+    const totalClientPages = Math.ceil(fullDeletableUserList.length / CLIENT_PAGE_SIZE);
+    
+    if (action === 'prev') {
+        if (clientDeletableCurrentPage > 1) { clientDeletableCurrentPage--; renderDeletableClientPage(); }
+    } else if (action === 'next') {
+        if (clientDeletableCurrentPage < totalClientPages) { clientDeletableCurrentPage++; renderDeletableClientPage(); }
+    } else if (action === 'page') {
+        const page = parseInt(target.dataset.page, 10);
+        if (page !== clientDeletableCurrentPage) { clientDeletableCurrentPage = page; renderDeletableClientPage(); }
     }
 });
 
@@ -272,4 +330,102 @@ function populateModal(data) {
     }
     coursesTable += `</tbody></table></div>`;
     modalContent.innerHTML = userDetails + coursesTable;
+}
+
+// --- NOVAS FUNÇÕES PARA A LÓGICA DE DELEÇÃO ---
+
+async function fetchDeletableUsers({ platformName, apiKey }) {
+    deleteResultsContainer.innerHTML = `<div class="feedback"><div class="loader"></div>Buscando usuários inativos. Isso pode demorar vários minutos...</div>`;
+    submitButton.disabled = true;
+    deletePaginationContainer.innerHTML = '';
+
+    try {
+        const response = await fetch('http://localhost:3000/api/users/deletable', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ platformName, apiKey })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Erro ${response.status}`);
+        }
+
+        const responseData = await response.json();
+        fullDeletableUserList = responseData || [];
+        renderDeletableClientPage();
+
+    } catch (error) {
+        deleteResultsContainer.innerHTML = `<div class="feedback error"><strong>Falha na requisição.</strong><br><small>${error.message}</small></div>`;
+    } finally {
+        submitButton.disabled = false;
+    }
+}
+
+function renderDeletableClientPage() {
+    const totalClientPages = Math.ceil(fullDeletableUserList.length / CLIENT_PAGE_SIZE);
+    if (totalClientPages > 0 && clientDeletableCurrentPage > totalClientPages) {
+        clientDeletableCurrentPage = totalClientPages;
+    }
+    const start = (clientDeletableCurrentPage - 1) * CLIENT_PAGE_SIZE;
+    const end = start + CLIENT_PAGE_SIZE;
+    const usersToDisplay = fullDeletableUserList.slice(start, end);
+    displayDeletableUsersTable(usersToDisplay);
+    // Note: A paginação para a lista de exclusão será adicionada em um passo futuro se necessário.
+    renderDeletablePaginationControls(clientDeletableCurrentPage, totalClientPages);
+}
+
+function displayDeletableUsersTable(users) {
+    if (!users || users.length === 0) {
+        deleteResultsContainer.innerHTML = `<div class="feedback">Nenhum usuário com todos os acessos encerrados foi encontrado.</div>`;
+        deletePaginationContainer.innerHTML = '';
+        return;
+    }
+    let tableHTML = `
+        <table>
+            <thead><tr><th>Nome</th><th>Email</th><th>Último Acesso</th><th>Ações</th></tr></thead>
+            <tbody>`;
+    users.forEach(user => {
+        const ultimoAcesso = formatarDataRelativa(user.ultimo_acesso_em);
+        tableHTML += `
+            <tr>
+                <td>${user.nome || ''}</td>
+                <td>${user.email || ''}</td>
+                <td>${ultimoAcesso}</td>
+                <td>
+                    <button class="delete-btn" data-email="${user.email}" title="Deletar ${user.nome}" disabled>
+                        Deletar
+                    </button>
+                </td>
+            </tr>`;
+    });
+    tableHTML += `</tbody></table>`;
+    deleteResultsContainer.innerHTML = tableHTML;
+}
+
+function renderDeletablePaginationControls(currentPage, totalPages) {
+    if (totalPages <= 1) {
+        deletePaginationContainer.innerHTML = '';
+        return;
+    }
+    let html = '';
+    const maxVisibleButtons = 7;
+    html += `<button class="page-btn" data-action="prev" ${currentPage === 1 ? 'disabled' : ''}>&larr;</button>`;
+    if (totalPages <= maxVisibleButtons) {
+        for (let i = 1; i <= totalPages; i++) { html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" data-action="page" data-page="${i}">${i}</button>`; }
+    } else {
+        let pages = [1];
+        let start = Math.max(2, currentPage - 1), end = Math.min(totalPages - 1, currentPage + 1);
+        if (currentPage > 3) pages.push('...');
+        for (let i = start; i <= end; i++) pages.push(i);
+        if (currentPage < totalPages - 2) pages.push('...');
+        pages.push(totalPages);
+        pages = [...new Set(pages)];
+        pages.forEach(p => {
+            if (p === '...') { html += `<span class="page-ellipsis">...</span>`; }
+            else { html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" data-action="page" data-page="${p}">${p}</button>`; }
+        });
+    }
+    html += `<button class="page-btn" data-action="next" ${currentPage === totalPages ? 'disabled' : ''}>&rarr;</button>`;
+    deletePaginationContainer.innerHTML = html;
 }
