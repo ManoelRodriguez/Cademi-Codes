@@ -1,54 +1,126 @@
-/* --- Estilos Gerais --- */
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    background-color: #f0f2f5;
-    color: #333;
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
+/* --- Reset Básico e Fontes --- */
+:root {
+    --cademi-pink: #d63384;
+    --cademi-pink-dark: #b82a70;
+    --background-color: #f8f9fa;
+    --sidebar-bg: #ffffff;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --border-color: #dee2e6;
 }
 
-/* Container Principal */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-primary);
+}
+
+/* --- Estrutura Principal (Layout) --- */
+.app-container {
+    display: flex;
+}
+
+.sidebar {
+    width: 240px;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding: 20px;
+}
+
+.main-content {
+    flex-grow: 1;
+    margin-left: 240px;
+    /* Mesma largura da sidebar */
+    padding: 30px 40px;
+}
+
+/* --- Barra Lateral --- */
+.sidebar-header h2 {
+    font-size: 24px;
+    color: var(--text-primary);
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-menu {
+    list-style: none;
+}
+
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 10px;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-weight: 500;
+    border-radius: 8px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.sidebar-menu li a:hover {
+    background-color: #f1f3f5;
+    color: var(--text-primary);
+}
+
+.sidebar-menu li a.active {
+    color: var(--cademi-pink);
+    font-weight: 600;
+}
+
+.sidebar-menu li a svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* --- Conteúdo Principal e Formulário --- */
 .container {
     width: 100%;
-    max-width: 900px;
-    background-color: #ffffff;
-    padding: 30px 40px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 950px;
+    /* Aumentado para o novo layout */
+    margin: 0 auto;
 }
 
 h1 {
-    color: #1a202c;
-    text-align: center;
+    color: var(--text-primary);
     margin-bottom: 30px;
+    font-size: 28px;
 }
 
-/* Formulário */
 .api-form {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
     display: flex;
+    justify-content: center;
+    align-items: center;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
     margin-bottom: 30px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
 }
 
 .form-group label {
     margin-bottom: 8px;
     font-weight: 600;
-    color: #4a5568;
+    color: var(--text-secondary);
 }
 
 .form-group input {
+    width: 400px;
     padding: 12px;
-    border: 1px solid #cbd5e0;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 16px;
     transition: border-color 0.3s, box-shadow 0.3s;
@@ -56,17 +128,17 @@ h1 {
 
 .form-group input:focus {
     outline: none;
-    border-color: #4299e1;
-    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+    border-color: var(--cademi-pink);
+    box-shadow: 0 0 0 3px rgba(214, 51, 132, 0.25);
 }
 
-/* Botão */
 .submit-btn {
+    width: 400px;
     padding: 14px 20px;
     font-size: 16px;
     font-weight: bold;
     color: #ffffff;
-    background-color: #2b6cb0;
+    background-color: var(--cademi-pink);
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -74,7 +146,7 @@ h1 {
 }
 
 .submit-btn:hover {
-    background-color: #2c5282;
+    background-color: var(--cademi-pink-dark);
 }
 
 .submit-btn:disabled {
@@ -82,10 +154,16 @@ h1 {
     cursor: not-allowed;
 }
 
+
+/* --- Tabela, Paginação e Modal (Estilos adaptados do seu original) --- */
+
 /* Tabela de Resultados */
 .results-container {
     margin-top: 20px;
     overflow-x: auto;
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
 }
 
 table {
@@ -98,37 +176,60 @@ th,
 td {
     padding: 12px 15px;
     text-align: left;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 thead th {
-    background-color: #edf2f7;
-    color: #4a5568;
+    background-color: #f8f9fa;
+    color: var(--text-secondary);
     font-weight: 600;
     text-transform: uppercase;
 }
 
-tbody tr:hover {
-    background-color: #f7fafc;
+tbody tr:last-child td {
+    border-bottom: none;
 }
+
+tbody tr:hover {
+    background-color: #f1f3f5;
+}
+
+/* Ícone de Edição */
+.edit-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.edit-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: var(--text-secondary);
+    transition: fill 0.2s;
+}
+
+.edit-btn:hover svg {
+    fill: var(--cademi-pink);
+}
+
 
 /* Mensagens de feedback */
 .feedback {
     text-align: center;
-    padding: 20px;
+    padding: 40px;
     font-size: 16px;
-    color: #718096;
-    border: 1px dashed #cbd5e0;
-    border-radius: 8px;
+    color: var(--text-secondary);
 }
 
 .feedback.error {
     color: #c53030;
     background-color: #fed7d7;
-    border-color: #c53030;
+    border-radius: 8px;
+    padding: 20px;
 }
 
-/* --- Estilos para Paginação Avançada --- */
+/* Paginação */
 .pagination-container {
     display: flex;
     justify-content: center;
@@ -144,59 +245,37 @@ tbody tr:hover {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    border: 1px solid #cbd5e0;
+    border: 1px solid var(--border-color);
     background-color: #ffffff;
-    color: #4a5568;
+    color: var(--text-secondary);
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .page-btn:hover:not(:disabled) {
-    background-color: #edf2f7;
-    border-color: #a0aec0;
+    background-color: #e9ecef;
+    border-color: #adb5bd;
 }
 
 .page-btn.active {
-    background-color: #2b6cb0;
+    background-color: var(--cademi-pink);
     color: #ffffff;
-    border-color: #2b6cb0;
+    border-color: var(--cademi-pink);
 }
 
 .page-btn:disabled {
-    background-color: #f7fafc;
-    color: #cbd5e0;
+    background-color: #f8f9fa;
+    color: #ced4da;
     cursor: not-allowed;
-    border-color: #e2e8f0;
 }
 
 .page-ellipsis {
-    display: flex;
-    align-items: flex-end;
-    color: #718096;
+    color: var(--text-secondary);
     padding: 0 5px;
 }
 
-/* --- Estilos para o Ícone de Edição --- */
-.edit-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px;
-}
-
-.edit-btn svg {
-    width: 18px;
-    height: 18px;
-    fill: #4a5568;
-    transition: fill 0.2s;
-}
-
-.edit-btn:hover svg {
-    fill: #2b6cb0;
-}
-
-/* --- Estilos para o Modal --- */
+/* Modal e Loader */
 .hidden {
     display: none !important;
 }
@@ -240,8 +319,7 @@ tbody tr:hover {
 
 #modal-user-details h2 {
     margin-top: 0;
-    color: #1a202c;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: 10px;
 }
 
@@ -252,13 +330,11 @@ tbody tr:hover {
 
 #modal-courses-table h3 {
     margin-top: 30px;
-    color: #1a202c;
 }
 
-/* Estilo para o loader/spinner */
 .loader {
     border: 5px solid #f3f3f3;
-    border-top: 5px solid #2b6cb0;
+    border-top: 5px solid var(--cademi-pink);
     border-radius: 50%;
     width: 50px;
     height: 50px;
@@ -270,7 +346,49 @@ tbody tr:hover {
     0% {
         transform: rotate(0deg);
     }
+
     100% {
         transform: rotate(360deg);
     }
 }
+
+/* --- Estilos para o botão de ver/esconder API Key --- */
+
+/* Adiciona posicionamento relativo ao container do input */
+.form-group-relative {
+    position: relative;
+}
+
+/* Garante que o texto do input não passe por baixo do ícone */
+#apiKey {
+    padding-right: 45px !important;
+}
+
+/* Estilo do botão que contém os ícones */
+.api-key-toggle-btn {
+    position: absolute;
+    top: 50%; /* Centraliza na metade da altura do container */
+    transform: translateY(-50%); /* Ajusta para alinhar o meio do ícone */
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+}
+
+/* Estilo dos ícones SVG dentro do botão */
+.api-key-toggle-btn svg {
+    width: 22px;
+    height: 22px;
+    fill: var(--text-secondary);
+    transition: fill 0.2s ease-in-out;
+}
+
+.api-key-toggle-btn:hover svg {
+    fill: var(--text-primary);
+}
+
