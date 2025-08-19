@@ -131,31 +131,6 @@ function renderClientPage() {
     renderPaginationControls(clientCurrentPage, totalClientPages);
 }
 
-function displayUsersTable(users) {
-    if (!users || users.length === 0) {
-        resultsContainer.innerHTML = `<div class="feedback">Nenhum usuário encontrado.</div>`;
-        paginationContainer.innerHTML = '';
-        return;
-    }
-    let tableHTML = `
-        <table>
-            <thead><tr><th>Nome</th><th>Email</th><th>Celular</th><th>Último Acesso</th><th>Ações</th></tr></thead>
-            <tbody>`;
-    users.forEach(user => {
-        const ultimoAcesso = user.ultimo_acesso_em ? new Date(user.ultimo_acesso_em).toLocaleString('pt-BR') : 'Nunca';
-        tableHTML += `
-            <tr>
-                <td>${user.nome || ''}</td>
-                <td>${user.email || ''}</td>
-                <td>${user.celular || 'Não informado'}</td>
-                <td>${ultimoAcesso}</td>
-                <td><button class="edit-btn" data-email="${user.email}" title="Ver Acessos de ${user.nome}"><svg viewBox="0 0 24 24"><path d="M14.06,9.02l0.91,0.91L5.91,19.06H5v-0.91L14.06,9.02 M17.66,3c-0.25,0-0.51,0.1-0.7,0.29l-1.83,1.83l3.75,3.75l1.83-1.83c0.39-0.39,0.39-1.02,0-1.41l-2.34-2.34C18.17,3.09,17.92,3,17.66,3L17.66,3z M14.06,6.19L3,17.25V21h3.75L17.81,9.94L14.06,6.19L14.06,6.19z"></path></svg></button></td>
-            </tr>`;
-    });
-    tableHTML += `</tbody></table>`;
-    resultsContainer.innerHTML = tableHTML;
-}
-
 function renderPaginationControls(currentPage, totalPages) {
     if (totalPages <= 1) {
         paginationContainer.innerHTML = '';
@@ -199,6 +174,77 @@ async function showUserAccessModal(userEmail) {
     } catch (error) {
         modalContent.innerHTML = `<div class="feedback error">${error.message}</div>`;
     }
+}
+
+function displayUsersTable(users) {
+    if (!users || users.length === 0) {
+        resultsContainer.innerHTML = `<div class="feedback">Nenhum usuário encontrado.</div>`;
+        paginationContainer.innerHTML = '';
+        return;
+    }
+    let tableHTML = `
+        <table>
+            <thead><tr><th>Nome</th><th>Email</th><th>Celular</th><th>Último Acesso</th><th>Ações</th></tr></thead>
+            <tbody>`;
+    users.forEach(user => {
+        // A MUDANÇA ACONTECE AQUI
+        const ultimoAcesso = formatarDataRelativa(user.ultimo_acesso_em);
+        
+        tableHTML += `
+            <tr>
+                <td>${user.nome || ''}</td>
+                <td>${user.email || ''}</td>
+                <td>${user.celular || 'Não informado'}</td>
+                <td>${ultimoAcesso}</td>
+                <td><button class="edit-btn" data-email="${user.email}" title="Ver Acessos de ${user.nome}"><svg viewBox="0 0 24 24"><path d="M14.06,9.02l0.91,0.91L5.91,19.06H5v-0.91L14.06,9.02 M17.66,3c-0.25,0-0.51,0.1-0.7,0.29l-1.83,1.83l3.75,3.75l1.83-1.83c0.39-0.39,0.39-1.02,0-1.41l-2.34-2.34C18.17,3.09,17.92,3,17.66,3L17.66,3z M14.06,6.19L3,17.25V21h3.75L17.81,9.94L14.06,6.19L14.06,6.19z"></path></svg></button></td>
+            </tr>`;
+    });
+    tableHTML += `</tbody></table>`;
+    resultsContainer.innerHTML = tableHTML;
+}
+
+/**
+ * Formata uma data para exibição relativa (Hoje, Ontem, Há X dias, Há X meses).
+ * @param {string | null} dataString A data em formato de string (ISO 8601).
+ * @returns {string} A data formatada de forma relativa.
+ */
+function formatarDataRelativa(dataString) {
+    // Se a data não existir, retorna 'Nunca'
+    if (!dataString) {
+        return 'Nunca';
+    }
+
+    const agora = new Date();
+    const dataAcesso = new Date(dataString);
+
+    // Calcula a diferença em milissegundos
+    const diferencaMs = agora.getTime() - dataAcesso.getTime();
+
+    // Converte a diferença para dias (1 dia = 24 * 60 * 60 * 1000 milissegundos)
+    const diferencaDias = Math.floor(diferencaMs / 86400000);
+
+    // Lógica de exibição baseada no número de dias
+    if (diferencaDias < 0) {
+        return 'Em breve'; // Caso a data seja no futuro
+    }
+    if (diferencaDias === 0) {
+        return 'Hoje';
+    }
+    if (diferencaDias === 1) {
+        return 'Ontem';
+    }
+    if (diferencaDias <= 30) {
+        return `Há ${diferencaDias} dias`;
+    }
+
+    // Se for mais de 30 dias, exibe em meses
+    const diferencaMeses = Math.floor(diferencaDias / 30);
+
+    if (diferencaMeses === 1) {
+        return 'Há 1 mês';
+    }
+
+    return `Há ${diferencaMeses} meses`;
 }
 
 function populateModal(data) {

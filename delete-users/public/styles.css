@@ -92,6 +92,10 @@ body {
     margin: 0 auto;
 }
 
+.container h2{
+    margin-bottom: 20px;
+}
+
 h1 {
     color: var(--text-primary);
     margin-bottom: 30px;
