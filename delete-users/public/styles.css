@@ -92,7 +92,7 @@ body {
     margin: 0 auto;
 }
 
-.container h2{
+.container h2 {
     margin-bottom: 20px;
 }
 
@@ -371,8 +371,10 @@ tbody tr:hover {
 /* Estilo do botão que contém os ícones */
 .api-key-toggle-btn {
     position: absolute;
-    top: 50%; /* Centraliza na metade da altura do container */
-    transform: translateY(-50%); /* Ajusta para alinhar o meio do ícone */
+    top: 50%;
+    /* Centraliza na metade da altura do container */
+    transform: translateY(-50%);
+    /* Ajusta para alinhar o meio do ícone */
     right: 12px;
     background: none;
     border: none;
@@ -394,5 +396,10 @@ tbody tr:hover {
 
 .api-key-toggle-btn:hover svg {
     fill: var(--text-primary);
+}
+
+.delete-btn {
+    border: none;
+    margin: 5px;
 }
 

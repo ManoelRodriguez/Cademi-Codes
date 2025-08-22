@@ -2,6 +2,8 @@
 const express = require('express');
 const axios =require('axios');
 const cors = require('cors');
+const pLimit = require('p-limit');
+
 
 const app = express();
 const port = 3000;
@@ -104,8 +106,7 @@ app.post('/api/users/all', async (req, res) => {
     }
 });
 
-
-// ENDPOINT FINAL E CORRIGIDO: Processa sequencialmente respeitando o rate limit
+// ENDPOINT FINAL, OTIMIZADO E CORRETO: Processa em lotes de 2 com pausa de 1 segundo
 app.post('/api/users/deletable', async (req, res) => {
     const { platformName, apiKey } = req.body;
 
@@ -114,8 +115,9 @@ app.post('/api/users/deletable', async (req, res) => {
     }
 
     try {
-        console.log('Iniciando busca por usuários deletáveis...');
-        // 1. BUSCAR OS USUÁRIOS
+        console.log('Iniciando busca por usuários deletáveis (modo otimizado em lotes)...');
+        
+        // Etapa 1: Buscar todos os usuários
         let allUsers = [];
         let nextUrl = `https://${platformName}.cademi.com.br/api/v1/usuario`;
         while (nextUrl) {
@@ -125,44 +127,49 @@ app.post('/api/users/deletable', async (req, res) => {
                 allUsers.push(...usersFromPage);
             }
             nextUrl = usersResponse.data.data.paginator.next_page_url;
-            if (nextUrl) await new Promise(resolve => setTimeout(resolve, 500)); // Pausa de 500ms entre as páginas de usuários
+            if (nextUrl) await new Promise(resolve => setTimeout(resolve, 500));
         }
-        console.log(`Total de ${allUsers.length} usuários encontrados. Verificando acessos um por um...`);
+        console.log(`Total de ${allUsers.length} usuários encontrados. Verificando acessos em pares...`);
 
-        // 3. ARMAZENAR E TRATAR NO BACKEND
+        // Etapa 2: Processar usuários em lotes de 2 para respeitar o rate limit
         const deletableUsers = [];
-        let count = 0;
 
-        // 2. PARA CADA USUÁRIO, FAZER UMA REQUISIÇÃO DE ACESSO
-        for (const user of allUsers) {
-            count++;
-            if (!user.email) {
-                console.log(`Progresso: ${count}/${allUsers.length} - Usuário sem email, pulando.`);
-                continue; // Pula usuários sem e-mail
-            }
+        // Função interna para processar um único usuário
+        const processUser = async (user) => {
+            if (!user || !user.email) return;
 
             try {
                 const encodedEmail = encodeURIComponent(user.email);
                 const accessUrl = `https://${platformName}.cademi.com.br/api/v1/usuario/acesso/${encodedEmail}`;
-                const accessResponse = await axios.get(accessUrl, {
-                    headers: { 'Authorization': `Bearer ${apiKey}` }
-                });
-                
-                const accesses = accessResponse.data.data.acesso || [];
-                
-                const allAccessesClosed = accesses.every(acesso => acesso.encerrado === true);
+                const accessResponse = await axios.get(accessUrl, { headers: { 'Authorization': `Bearer ${apiKey}` } });
 
-                if (allAccessesClosed) {
+                const accesses = accessResponse.data.data.acesso || [];
+                if (accesses.every(acesso => acesso.encerrado === true)) {
                     deletableUsers.push(user);
                 }
-                console.log(`Progresso: ${count}/${allUsers.length} - Verificado: ${user.email}. Deletáveis até agora: ${deletableUsers.length}`);
-
-            } catch (accessError) {
-                console.error(`Progresso: ${count}/${allUsers.length} - Falha ao buscar acesso para ${user.email}:`, accessError.message);
+            } catch (error) {
+                console.error(`Falha ao buscar acesso para ${user.email}:`, error.message);
             }
-            
-            // 4. PAUSA DE 500ms POR REQUISIÇÃO
-            await new Promise(resolve => setTimeout(resolve, 500));
+        };
+
+        // Loop principal que processa a lista em pares
+        for (let i = 0; i < allUsers.length; i += 2) {
+            const user1 = allUsers[i];
+            const user2 = allUsers[i + 1]; // Pode ser undefined se o número de usuários for ímpar
+
+            // Cria as duas promises para o lote atual
+            const promise1 = processUser(user1);
+            const promise2 = processUser(user2); // A função processUser lida com o caso de user2 ser undefined
+
+            // Executa as duas requisições em paralelo e espera ambas terminarem
+            await Promise.all([promise1, promise2]);
+
+            console.log(`Progresso: ${Math.min(i + 2, allUsers.length)}/${allUsers.length} usuários verificados. Deletáveis: ${deletableUsers.length}`);
+
+            // Pausa de 1 segundo entre os lotes de 2, garantindo o limite da API
+            if (i + 2 < allUsers.length) { // Não pausa após o último lote
+                 await new Promise(resolve => setTimeout(resolve, 1000));
+            }
         }
 
         console.log('Busca finalizada.');

@@ -113,7 +113,7 @@ deletePaginationContainer.addEventListener('click', (event) => {
     if (!target || target.disabled) return;
     const action = target.dataset.action;
     const totalClientPages = Math.ceil(fullDeletableUserList.length / CLIENT_PAGE_SIZE);
-    
+
     if (action === 'prev') {
         if (clientDeletableCurrentPage > 1) { clientDeletableCurrentPage--; renderDeletableClientPage(); }
     } else if (action === 'next') {
@@ -247,14 +247,14 @@ function displayUsersTable(users) {
     users.forEach(user => {
         // A MUDANÇA ACONTECE AQUI
         const ultimoAcesso = formatarDataRelativa(user.ultimo_acesso_em);
-        
+
         tableHTML += `
             <tr>
                 <td>${user.nome || ''}</td>
                 <td>${user.email || ''}</td>
                 <td>${user.celular || 'Não informado'}</td>
                 <td>${ultimoAcesso}</td>
-                <td><button class="edit-btn" data-email="${user.email}" title="Ver Acessos de ${user.nome}"><svg viewBox="0 0 24 24"><path d="M14.06,9.02l0.91,0.91L5.91,19.06H5v-0.91L14.06,9.02 M17.66,3c-0.25,0-0.51,0.1-0.7,0.29l-1.83,1.83l3.75,3.75l1.83-1.83c0.39-0.39,0.39-1.02,0-1.41l-2.34-2.34C18.17,3.09,17.92,3,17.66,3L17.66,3z M14.06,6.19L3,17.25V21h3.75L17.81,9.94L14.06,6.19L14.06,6.19z"></path></svg></button></td>
+                <td><button class="edit-btn" data-email="${user.email}" title="Ver Acessos de ${user.nome}"><i class="fa-solid fa-pen-to-square"></i></button></td>
             </tr>`;
     });
     tableHTML += `</tbody></table>`;
@@ -393,8 +393,11 @@ function displayDeletableUsersTable(users) {
                 <td>${user.email || ''}</td>
                 <td>${ultimoAcesso}</td>
                 <td>
-                    <button class="delete-btn" data-email="${user.email}" title="Deletar ${user.nome}" disabled>
-                        Deletar
+                    <button class="delete-btn" data-email="${user.email}" title="Ver Acessos de ${user.nome}">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                    <button class="delete-btn" data-email="${user.email}" title="Ver Acessos de ${user.nome}">    
+                        <i class="fa-solid fa-trash"></i>
                     </button>
                 </td>
             </tr>`;
